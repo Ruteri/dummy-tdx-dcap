@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ruteri/dummy-tdx-dcap/common"
-	"github.com/ruteri/dummy-tdx-dcap/metrics"
 	"github.com/flashbots/go-utils/httplogger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/ruteri/dummy-tdx-dcap/common"
+	"github.com/ruteri/dummy-tdx-dcap/metrics"
 	"go.uber.org/atomic"
 )
 

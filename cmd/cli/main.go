@@ -64,6 +64,7 @@ func runCli(cCtx *cli.Context) error {
 		log.Error("could not request the dummy quote", "err", err)
 		return err
 	}
+	defer resp.Body.Close()
 
 	quote, err := io.ReadAll(resp.Body)
 	if err != nil {

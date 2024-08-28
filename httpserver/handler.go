@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ruteri/dummy-tdx-dcap/metrics"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/go-tdx-guest/client"
+	"github.com/ruteri/dummy-tdx-dcap/metrics"
 )
 
 func TdxAttest(appdata [64]byte) ([]byte, error) {
@@ -49,7 +50,10 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(quote)
+	_, err = w.Write(quote)
+	if err != nil {
+		log.Error("could not send back the quote", "err", err)
+	}
 }
 
 func (s *Server) handleLivenessCheck(w http.ResponseWriter, r *http.Request) {
