@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -64,6 +65,11 @@ func runCli(cCtx *cli.Context) error {
 		log.Error("could not request the dummy quote", "err", err)
 		return err
 	}
+	if resp == nil {
+		log.Error("nil response")
+		return errors.New("nil response")
+	}
+
 	defer resp.Body.Close()
 
 	quote, err := io.ReadAll(resp.Body)

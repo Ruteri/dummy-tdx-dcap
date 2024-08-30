@@ -61,6 +61,8 @@ func (s *Server) handleAttest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+const MaxQuoteSize = 1280
+
 func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	m := s.metricsSrv.Float64Histogram(
 		"request_duration_api",
@@ -72,9 +74,14 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 		m.Record(r.Context(), float64(time.Since(start).Microseconds()))
 	}(time.Now())
 
-	var rawQuoteData [1280]byte // 1020 is min size, what's the max size?
+	if r.Body == nil {
+		http.Error(w, "no quote", http.StatusBadRequest)
+		return
+	}
+
+	var rawQuoteData [MaxQuoteSize]byte // 1020 is min size, what's the max size?
 	n, err := r.Body.Read(rawQuoteData[:])
-	if n == 1280 {
+	if n == MaxQuoteSize {
 		http.Error(w, "quote too large", http.StatusBadRequest)
 		return
 	}

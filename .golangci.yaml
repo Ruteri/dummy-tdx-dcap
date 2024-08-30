@@ -11,6 +11,7 @@ linters:
     - godot
     - godox
     - gomnd
+    - mnd
     - lll
     - nestif
     - nilnil
@@ -29,8 +30,7 @@ linters:
     - varcheck
     - exhaustruct
     - depguard
-    - goerr113
-    - mnd
+    - err113
 
     #
     # Disabled because of generics:
