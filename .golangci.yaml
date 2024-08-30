@@ -29,6 +29,8 @@ linters:
     - varcheck
     - exhaustruct
     - depguard
+    - goerr113
+    - mnd
 
     #
     # Disabled because of generics:

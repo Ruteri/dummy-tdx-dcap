@@ -103,7 +103,7 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	options := verify.DefaultOptions()
-	// TODO: fetch colateral before verifying to distinguish the error better
+	// TODO: fetch collateral before verifying to distinguish the error better
 	err = verify.TdxQuote(protoQuote, options)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusTeapot)
