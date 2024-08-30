@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"encoding/hex"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -17,9 +20,9 @@ var flags []cli.Flag = []cli.Flag{
 		Usage: "dummy attestation service url to request",
 	},
 	&cli.StringFlag{
-		Name:  "appdata",
+		Name:  "quote",
 		Value: "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-		Usage: "appdata (user data) to submit",
+		Usage: "hexencoded quote to verify",
 	},
 	&cli.BoolFlag{
 		Name:  "log-json",
@@ -35,8 +38,8 @@ var flags []cli.Flag = []cli.Flag{
 
 func main() {
 	app := &cli.App{
-		Name:   "dummy attestation cli",
-		Usage:  "Request a dummy attestation",
+		Name:   "dummy quote verification cli",
+		Usage:  "Verify a quote",
 		Flags:  flags,
 		Action: runCli,
 	}
@@ -50,7 +53,7 @@ func runCli(cCtx *cli.Context) error {
 	logJSON := cCtx.Bool("log-json")
 	logDebug := cCtx.Bool("log-debug")
 
-	data := cCtx.String("appdata")
+	quoteHex := cCtx.String("quote")
 	url := cCtx.String("url")
 
 	log := common.SetupLogger(&common.LoggingOpts{
@@ -59,19 +62,34 @@ func runCli(cCtx *cli.Context) error {
 		Version: common.Version,
 	})
 
-	resp, err := http.Get(url + "/attestation/" + data)
+	rawQuote, err := hex.DecodeString(quoteHex)
 	if err != nil {
-		log.Error("could not request the dummy quote", "err", err)
+		log.Error("could not parse quote", "err", err)
 		return err
 	}
+
+	resp, err := http.Post(url+"/verify", "application/octet-stream", bytes.NewReader(rawQuote))
+	if err != nil {
+		log.Error("could not request the dummy service", "err", err)
+		return err
+	}
+	if resp == nil {
+		log.Error("nil response")
+		return errors.New("nil response")
+	}
+
 	defer resp.Body.Close()
 
-	quote, err := io.ReadAll(resp.Body)
+	respData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Error("could not get the dummy quote from response", "err", err)
+		log.Error("could not get the quote from response", "err", err)
 		return err
 	}
 
-	log.Info("Success", "quote", quote)
+	if resp.StatusCode == http.StatusOK {
+		log.Info("Success", "quote", respData)
+	} else {
+		log.Info("Failure", "reason", respData)
+	}
 	return nil
 }

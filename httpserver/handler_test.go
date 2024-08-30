@@ -1,6 +1,9 @@
 package httpserver
 
 import (
+	"bytes"
+	_ "embed"
+	"encoding/hex"
 	"io"
 	"log/slog"
 	"net/http"
@@ -19,6 +22,44 @@ func getTestLogger() *slog.Logger {
 		Service: "test",
 		Version: "test",
 	})
+}
+
+var (
+	//go:embed sample_quote.hex
+	quoteData string
+	//go:embed sample_result.json
+	expectedVerifyResult string
+)
+
+func Test_verify_sample(t *testing.T) {
+	// TODO: might start failing at some point once TCB is outdated. Would be great to freeze the collateral.
+	const (
+		latency    = 200 * time.Millisecond
+		listenAddr = ":8080"
+	)
+
+	//nolint: exhaustruct
+	s, err := New(&HTTPServerConfig{
+		DrainDuration: latency,
+		ListenAddr:    listenAddr,
+		Log:           getTestLogger(),
+	})
+	require.NoError(t, err)
+
+	rawQuote, err := hex.DecodeString(quoteData)
+	require.NoError(t, err)
+
+	{ // Check health
+		req := httptest.NewRequest(http.MethodPost, "http://localhost"+listenAddr+"/verify", bytes.NewReader(rawQuote))
+		w := httptest.NewRecorder()
+		s.handleVerify(w, req)
+		resp := w.Result()
+		defer resp.Body.Close()
+		responseBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode, "Verification should pass")
+		require.Equal(t, []byte(expectedVerifyResult), responseBody)
+	}
 }
 
 func Test_Handlers_Healthcheck_Drain_Undrain(t *testing.T) {

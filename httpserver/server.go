@@ -63,7 +63,8 @@ func New(cfg *HTTPServerConfig) (srv *Server, err error) {
 	srv.isReady.Swap(true)
 
 	mux := chi.NewRouter()
-	mux.With(srv.httpLogger).Get("/attestation/{appdata}", srv.handleAPI)
+	mux.With(srv.httpLogger).Get("/attest/{appdata}", srv.handleAttest)
+	mux.With(srv.httpLogger).Post("/verify", srv.handleVerify)
 	mux.With(srv.httpLogger).Get("/livez", srv.handleLivenessCheck)
 	mux.With(srv.httpLogger).Get("/readyz", srv.handleReadinessCheck)
 	mux.With(srv.httpLogger).Get("/drain", srv.handleDrain)
