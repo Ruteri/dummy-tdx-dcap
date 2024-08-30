@@ -30,7 +30,6 @@ linters:
     - varcheck
     - exhaustruct
     - depguard
-    - err113
 
     #
     # Disabled because of generics:
