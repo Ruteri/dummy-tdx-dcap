@@ -18,7 +18,16 @@ import (
 
 func TdxAttest(appdata [64]byte) ([]byte, error) {
 	qp := &client.LinuxConfigFsQuoteProvider{}
-	return qp.GetRawQuote(appdata)
+	if qp.IsSupported() == nil {
+		return qp.GetRawQuote(appdata)
+	}
+
+	qd, err :=  client.OpenDevice()
+	if err != nil {
+		return nil, err
+	}
+
+	return client.GetRawQuote(qd, appdata)
 }
 
 func DummyAttest(appdata [64]byte) ([]byte, error) {
