@@ -14,12 +14,12 @@ clean:
 .PHONY: build-cli
 build-cli:
 	@mkdir -p ./build
-	go build -trimpath -ldflags "-X github.com/flashbots/go-template/common.Version=${VERSION}" -v -o ./build/cli cmd/cli/main.go
+	go build -trimpath -ldflags "-s -w -buildid= -X github.com/flashbots/go-template/common.Version=${VERSION}" -v -o ./build/cli cmd/cli/main.go
 
 .PHONY: build-httpserver
 build-httpserver:
 	@mkdir -p ./build
-	go build -trimpath -ldflags "-X github.com/flashbots/go-template/common.Version=${VERSION}" -v -o ./build/httpserver cmd/httpserver/main.go
+	go build -trimpath -ldflags "-s -w -buildid= -X github.com/flashbots/go-template/common.Version=${VERSION}" -v -o ./build/httpserver cmd/httpserver/main.go
 
 .PHONY: test
 test:
